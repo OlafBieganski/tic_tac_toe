@@ -1,4 +1,4 @@
-#include "tic_tac_toe.hh"
+#include "../inc/tic_tac_toe.hh"
 
 using namespace std;
 
@@ -17,18 +17,19 @@ int main(){
     cin >> numOfSym;
 
     do{
-        LOG("Do you want to play with computer or another player?");
+        LOG("Do you want to play with computer or another player? (y/n)");
         cin >> choice;
-    }while(choice != 'y' | choice != 'n');
+    }while(choice != 'y' && choice != 'n');
     playComp = (choice == 'y');
 
     do{
-        LOG("Who starts? You or the other player/computer?");
+        LOG("Who starts? You or the other player/computer? (y/n)");
         cin >> choice;
-    }while(choice != 'y' | choice != 'n');
+    }while(choice != 'y' && choice != 'n');
     whoStart = (choice == 'y');
 
     TicTacToe game(boardSize, numOfSym, whoStart, playComp);
-    
+    game.printBoard();
+
     return 0;
 }

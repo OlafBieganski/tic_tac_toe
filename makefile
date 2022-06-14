@@ -15,5 +15,5 @@ obj:
 obj/main.o: src/main.cpp inc/tic_tac_toe.hh
 	${CC} ${CFLAGS} -o obj/main.o src/main.cpp
 
-obj/tic_tac_toe.o: src/tic_tac_toe.cpp
+obj/tic_tac_toe.o: src/tic_tac_toe.cpp inc/tic_tac_toe.hh
 	${CC} ${CFLAGS} -o obj/tic_tac_toe.o src/tic_tac_toe.cpp

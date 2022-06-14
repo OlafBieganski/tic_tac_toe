@@ -4,7 +4,6 @@
 
 enum player {PLAYER1, PLAYER2, COMPUTER};
 enum gameStatus {WIN_X, TIE, WIN_O, NO_END};
-//enum moves {A, B, C, D, E, F, G, H, I};
 
 class TicTacToe {
     char** board;
@@ -12,6 +11,7 @@ class TicTacToe {
     player X = PLAYER1, O = PLAYER2;
     bool turn = true; // true = X, flase = O
     uint numToWin = 3;
+    gameStatus state = NO_END;
 
     public:
     TicTacToe();
@@ -19,7 +19,7 @@ class TicTacToe {
     ~TicTacToe();
     int evaluateBoard();
     bool makeMove(uint cords);
-    gameStatus Win();
+    bool Win();
     void printBoard();
     uint findBestMv();
     int minimax();

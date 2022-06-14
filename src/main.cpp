@@ -30,6 +30,11 @@ int main(){
 
     TicTacToe game(boardSize, numOfSym, whoStart, playComp);
     game.printBoard();
+    cout << game.makeMove(5) << endl;
+    game.makeMove(11);
+    game.makeMove(17);
+    game.printBoard();
+    cout << game.Win() << endl;
 
     return 0;
 }

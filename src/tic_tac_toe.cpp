@@ -2,6 +2,98 @@
 
 using namespace std;
 
+#define LOG(x) cout << x <<endl;
+
+TicTacToe initialize_Game(){
+    uint boardSize;
+    bool playComp, whoStart;
+    char choice;
+    uint numOfSym;
+
+    LOG("Type the size of the board you want to play on:");
+    cin >> boardSize;
+
+    LOG("Choose the number of symbols in a row for a win:");
+    cin >> numOfSym;
+
+    do{
+        LOG("Do you want to play with computer or another player? (y/n)");
+        cin >> choice;
+    }while(choice != 'y' && choice != 'n');
+    playComp = (choice == 'y');
+
+    do{
+        LOG("Who starts? You or the other player/computer? (y/n)");
+        cin >> choice;
+    }while(choice != 'y' && choice != 'n');
+    whoStart = (choice == 'y');
+
+    TicTacToe new_game(boardSize, numOfSym, whoStart, playComp);
+    cout << endl;
+
+    return new_game;
+}
+
+void TicTacToe::startGame(){
+    switch (this->O){        
+    case PLAYER2:
+        printBoard();
+        while(!Win()){
+            askForMove();
+            printBoard();
+        }
+        switch(state){
+            case WIN_X:
+            LOG("PLAYER 1 wins the game.");
+            break;
+            case WIN_O:
+            LOG("PLAYER 2 wins the game.");
+            break;
+            case TIE:
+            LOG("Game ends with tie. Nobody wins.");
+            default:
+            LOG("Something went wrong.");
+        }
+        break;
+
+    case COMPUTER:
+        printBoard();
+        LOG("Game with computer starts...");
+        break;
+    }
+}
+
+void TicTacToe::askForMove(){
+    if(turn){
+        LOG("PLAYER's 1 turn.");
+    } else {
+        switch(O){
+            case PLAYER2:
+            LOG("PLAYER's 2 turn.");
+            break;
+
+            case COMPUTER:
+            LOG("COMPUTER's turn.");
+            break;
+        }
+    }
+    LOG("Type the number of cell you want place your sign:");
+    uint num = -1;
+    cin >> num;
+    while (num < 0 && num > boardSize*boardSize-1){
+        LOG("Number of cell is out of the correct scope.");
+        cin >> num;
+    }
+    bool good;
+    do{
+        good = this->makeMove(num);
+        if(!good){
+            LOG("Invalid move. Try again!");
+            cin >> num;
+        }
+    }while(!good);
+}
+
 TicTacToe::TicTacToe(uint _boardSize, uint _numToWin, bool whoStarts, bool playWithComp){
     // dynamically create board of sufficient size
     board = new char*[_boardSize];
@@ -60,10 +152,23 @@ bool TicTacToe::makeMove(uint cords){
         sign = 'O';
     }
     board[row][column] = sign;
+    // change player for next round
+    turn = !turn;
     return true;
 }
 
 bool TicTacToe::Win(){
+    // set TIE as default if board fully filled
+    state = TIE;
+    for(uint i = 0; i < boardSize; i++){
+        for(uint j = 0; j < boardSize; j++){
+            if(board[i][j] == ' '){
+                state = NO_END; // still possible moves avaliable
+                i = boardSize; // so we break out of outer loop
+                break; // break out of this loop
+            }
+        }
+    }
     // check horizontal win
     for(uint i = 0; i < boardSize; i++){
         for(uint j = 0; j < boardSize - numToWin+1; j++){
@@ -140,6 +245,35 @@ bool TicTacToe::Win(){
             isWin = true;
             for(uint k = 0; k < numToWin; k++){
                 if(board[i+k][j+k] != 'O'){
+                    isWin = false;
+                    break;
+                }
+            }
+            if(isWin){
+                state = WIN_O;
+                return true;
+            }
+        }
+    }
+
+    // check diagonals reversed direction
+    for(uint i = 0; i < boardSize - numToWin+1; i++){
+        for(uint j = boardSize-1; j >= numToWin-1; j--){
+            bool isWin = true;
+            for(uint k = 0; k < numToWin; k++){
+                if(board[i+k][j-k] != 'X'){
+                    isWin = false;
+                    break;
+                }
+            }
+            if(isWin){
+                state = WIN_X;
+                //cout << "STATE: " <<  state << endl;
+                return true;
+            }
+            isWin = true;
+            for(uint k = 0; k < numToWin; k++){
+                if(board[i+k][j-k] != 'O'){
                     isWin = false;
                     break;
                 }

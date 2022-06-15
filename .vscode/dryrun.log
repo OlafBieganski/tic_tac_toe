@@ -1,6 +1,0 @@
-make --dry-run --always-make --keep-going --print-directory
-make: Entering directory '/home/olaf/tic_tac_toe'
-make: Leaving directory '/home/olaf/tic_tac_toe'
- 
-make: *** No rule to make target 'main.cpp', needed by 'obj/main.o'.
-

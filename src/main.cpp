@@ -5,36 +5,19 @@ using namespace std;
 #define LOG(x) cout << x <<endl;
 
 int main(){
-    uint boardSize;
-    bool playComp, whoStart;
-    char choice;
-    uint numOfSym;
+    bool gameON = true;
+    while(gameON){
 
-    LOG("Type the size of the board you want to play on:");
-    cin >> boardSize;
+        TicTacToe newGame = initialize_Game();
+        newGame.startGame();
 
-    LOG("Choose the number of symbols in a row for a win:");
-    cin >> numOfSym;
+        char choice;
+        do{
+            LOG("Do you want to play again? (y/n)");
+            cin >> choice;
+        }while(choice != 'y' && choice != 'n');
+        gameON = (choice == 'y');
 
-    do{
-        LOG("Do you want to play with computer or another player? (y/n)");
-        cin >> choice;
-    }while(choice != 'y' && choice != 'n');
-    playComp = (choice == 'y');
-
-    do{
-        LOG("Who starts? You or the other player/computer? (y/n)");
-        cin >> choice;
-    }while(choice != 'y' && choice != 'n');
-    whoStart = (choice == 'y');
-
-    TicTacToe game(boardSize, numOfSym, whoStart, playComp);
-    game.printBoard();
-    cout << game.makeMove(5) << endl;
-    game.makeMove(11);
-    game.makeMove(17);
-    game.printBoard();
-    cout << game.Win() << endl;
-
+    }
     return 0;
 }

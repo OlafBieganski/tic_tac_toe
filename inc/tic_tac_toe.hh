@@ -6,8 +6,8 @@ enum player {PLAYER1, PLAYER2, COMPUTER};
 enum gameStatus {WIN_X, TIE, WIN_O, NO_END};
 
 class TicTacToe {
-    char** board;
-    uint boardSize;
+    char** board = nullptr;
+    uint boardSize = 0;
     player X = PLAYER1, O = PLAYER2;
     bool turn = true; // true = X, flase = O
     uint numToWin = 3;
@@ -23,7 +23,10 @@ class TicTacToe {
     void printBoard();
     uint findBestMv();
     int minimax();
-    void getUserInput();
+    void askForMove();
+    void startGame();
 };
+
+TicTacToe initialize_Game();
 
 #endif

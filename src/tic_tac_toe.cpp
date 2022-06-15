@@ -1,8 +1,10 @@
 # include "../inc/tic_tac_toe.hh"
+#include <limits.h>
 
 using namespace std;
 
 #define LOG(x) cout << x <<endl;
+#define INF INT_MAX
 
 TicTacToe initialize_Game(){
     uint boardSize;
@@ -58,7 +60,10 @@ void TicTacToe::startGame(){
 
     case COMPUTER:
         printBoard();
-        LOG("Game with computer starts...");
+        while(!Win()){
+            askForMove();
+            printBoard();
+        }
         break;
     }
 }
@@ -74,6 +79,8 @@ void TicTacToe::askForMove(){
 
             case COMPUTER:
             LOG("COMPUTER's turn.");
+            uint compMv = findBestMv(true);
+            this->makeMove(compMv);
             break;
         }
     }
@@ -288,3 +295,33 @@ bool TicTacToe::Win(){
     return false;
 }
 
+uint TicTacToe::findBestMv(bool isMaxi){
+    uint bestMv;
+    int bestVal = -INF;
+    if(!isMaxi) bestVal = INF;
+    for(uint i = 0; i < boardSize; i++){
+        for(uint j = 0; j < boardSize; j--){
+            if(board[i][j] == ' '){
+                board[i][j] = 'O';
+                int currVal = minimax();
+                board[i][j] = ' ';
+                if(currVal > bestVal && isMaxi) bestMv = 4*i + j;
+                if(currVal < bestVal && !isMaxi) bestMv = 4*i + j;
+            }
+        }
+    }
+    return bestMv;
+}
+int TicTacToe::evaluateBoard(){
+    if(Win()){
+        switch(state){
+            case WIN_X:
+                return -INF;
+            case WIN_O:
+                return INF;
+        }
+    }
+}
+int minimax(){
+    
+}

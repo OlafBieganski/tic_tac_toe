@@ -21,7 +21,7 @@ class TicTacToe {
     bool makeMove(uint cords);
     bool Win();
     void printBoard();
-    uint findBestMv();
+    uint findBestMv(bool isMaxi);
     int minimax();
     void askForMove();
     void startGame();

@@ -28,12 +28,12 @@ class TicTacToe {
     uint findBestMv(bool isMaxi);
     void askForMove();
     void startGame();
-    friend int minimax(TicTacToe game, uint depth, bool isMaxi);
+    friend int minimax(TicTacToe game, uint depth, int alpha, int beta, bool isMaxi);
     TicTacToe & operator=(const TicTacToe & obj);
 };
 
 TicTacToe initialize_Game();
 // calculates best move given curretn state of the board
-int minimax(TicTacToe game, uint depth, bool isMaxi);
+int minimax(TicTacToe game, uint depth, int alpha, int beta,  bool isMaxi);
 
 #endif

@@ -4,7 +4,7 @@
 using namespace std;
 
 #define LOG(x) cout << x <<endl;
-#define INF INT_MAX
+#define INF 2000000000
 
 TicTacToe initialize_Game(){
     uint boardSize;
@@ -384,7 +384,9 @@ uint TicTacToe::findBestMv(bool isMaxi){
         for(uint j = 0; j < boardSize; j++){
             if(board[i][j] == ' '){
                 board[i][j] = 'O';
-                int currVal = minimax(*this , movesLeft(), !isMaxi);
+                int depth = movesLeft();
+                depth = depth > 8 ? 8 : depth;
+                int currVal = minimax(*this , depth, -INF, INF, !isMaxi);
                 board[i][j] = ' ';
                 if(currVal > bestVal && isMaxi){
                     bestMv = boardSize*i + j;
@@ -413,9 +415,14 @@ int TicTacToe::evaluateBoard(){
             return 0;
     }
 }
-int minimax(TicTacToe game, uint depth, bool isMaxi){
+int minimax(TicTacToe game, uint depth, int alpha, int beta, bool isMaxi){
     // check if recursion ends or at this board state game is finished
-    if(depth == 0 || game.Win()) return game.evaluateBoard();
+    if(depth == 0 || game.Win()){
+        int result = game.evaluateBoard(), add = 0;
+        if(game.state == WIN_O) add = depth;
+        if(game.state == WIN_X) add = -depth;
+        return result + add;
+    }
 
     if(isMaxi){
         int maxEval = -INF;
@@ -430,8 +437,10 @@ int minimax(TicTacToe game, uint depth, bool isMaxi){
             child.turn = false;
             child.makeMove(mv);
             mvUsed = true; // set mv as used
-            int eval = minimax(child, depth-1, false);
+            int eval = minimax(child, depth-1, alpha, beta, false);
             maxEval = max(maxEval, eval);
+            alpha = max(alpha, eval);
+            if(beta <= alpha) break;
         }
         return maxEval;
     }
@@ -452,8 +461,10 @@ int minimax(TicTacToe game, uint depth, bool isMaxi){
             child.printBoard();
             LOG("________parent's board________")
             game.printBoard();*/
-            int eval = minimax(child, depth-1, true);
+            int eval = minimax(child, depth-1, alpha, beta, true);
             minEval = min(minEval, eval);
+            beta = min(beta, eval);
+            if(beta <= alpha) break;
         }
         return minEval;
     }

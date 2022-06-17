@@ -9,7 +9,8 @@ class TicTacToe {
     char** board = nullptr;
     uint boardSize = 0;
     player X = PLAYER1, O = PLAYER2;
-    bool turn = true; // true = X, flase = O
+    // true = X, flase = O
+    bool turn = true;
     uint numToWin = 3;
     gameStatus state = NO_END;
 
@@ -17,16 +18,22 @@ class TicTacToe {
     TicTacToe();
     TicTacToe(uint _boardSize, uint _numToWin, bool whoStarts, bool playWithComp);
     ~TicTacToe();
+    TicTacToe(const TicTacToe & obj);
     int evaluateBoard();
     bool makeMove(uint cords);
     bool Win();
+    bool isMvPsbl(uint cords);
+    uint movesLeft();
     void printBoard();
     uint findBestMv(bool isMaxi);
-    int minimax();
     void askForMove();
     void startGame();
+    friend int minimax(TicTacToe game, uint depth, bool isMaxi);
+    TicTacToe & operator=(const TicTacToe & obj);
 };
 
 TicTacToe initialize_Game();
+// calculates best move given curretn state of the board
+int minimax(TicTacToe game, uint depth, bool isMaxi);
 
 #endif

@@ -53,6 +53,7 @@ void TicTacToe::startGame(){
             break;
             case TIE:
             LOG("Game ends with tie. Nobody wins.");
+            break;
             default:
             LOG("Something went wrong.");
         }
@@ -63,6 +64,19 @@ void TicTacToe::startGame(){
         while(!Win()){
             askForMove();
             printBoard();
+        }
+        switch(state){
+            case WIN_X:
+            LOG("PLAYER 1 wins the game.");
+            break;
+            case WIN_O:
+            LOG("COMPUTER wins the game.");
+            break;
+            case TIE:
+            LOG("Game ends with tie. Nobody wins.");
+            break;
+            default:
+            LOG("Something went wrong.");
         }
         break;
     }
@@ -81,7 +95,7 @@ void TicTacToe::askForMove(){
             LOG("COMPUTER's turn.");
             uint compMv = findBestMv(true);
             this->makeMove(compMv);
-            break;
+            return;
         }
     }
     LOG("Type the number of cell you want place your sign:");
@@ -99,6 +113,53 @@ void TicTacToe::askForMove(){
             cin >> num;
         }
     }while(!good);
+}
+
+TicTacToe::TicTacToe(const TicTacToe & obj){
+    boardSize = obj.boardSize;
+    X = obj.X, O = obj.O;
+    turn = obj.turn;
+    numToWin = obj.numToWin;
+    state = obj.state;
+    // dynamically create board of sufficient size
+    board = new char*[boardSize];
+    for(uint i = 0; i < boardSize; i++){
+        board[i] = new char[boardSize];
+    }
+    // copy values from obj
+    for(uint i = 0; i < boardSize; i++){
+        for(uint j = 0; j < boardSize; j++){
+            board[i][j] = obj.board[i][j];
+        }
+    }
+}
+
+TicTacToe & TicTacToe::operator=(const TicTacToe & obj){
+    // handling self assignment
+    if(this == &obj) return *this;
+    boardSize = obj.boardSize;
+    X = obj.X, O = obj.O;
+    turn = obj.turn;
+    numToWin = obj.numToWin;
+    state = obj.state;
+    if(board != nullptr){
+        for(uint i = 0; i < boardSize; i++){
+            delete [] board[i];
+        }
+        delete [] board;
+    }
+    // dynamically create board of sufficient size
+    board = new char*[boardSize];
+    for(uint i = 0; i < boardSize; i++){
+        board[i] = new char[boardSize];
+    }
+    // copy values from obj
+    for(uint i = 0; i < boardSize; i++){
+        for(uint j = 0; j < boardSize; j++){
+            board[i][j] = obj.board[i][j];
+        }
+    }
+    return *this;
 }
 
 TicTacToe::TicTacToe(uint _boardSize, uint _numToWin, bool whoStarts, bool playWithComp){
@@ -145,13 +206,23 @@ void TicTacToe::printBoard(){
     cout << endl;
 }
 
-bool TicTacToe::makeMove(uint cords){
+bool TicTacToe::isMvPsbl(uint cords){
     // check if cords are correct
-    if(cords > boardSize*boardSize-1) return false;
+    if(cords > boardSize*boardSize-1){
+        // just to check if minimax correct
+        cerr << "Error in isMvPsbl. Cordinates out of range." << endl;
+        return false;
+    }
     // check if place not filled
     uint row = cords / boardSize, column = cords % boardSize;
     if(board[row][column] != ' ') return false;
+    return true;
+}
+
+bool TicTacToe::makeMove(uint cords){
+    if(!isMvPsbl(cords)) return false;
     // check which player's turn
+    uint row = cords / boardSize, column = cords % boardSize;
     char sign;
     if(turn == true){
         sign = 'X';
@@ -291,8 +362,18 @@ bool TicTacToe::Win(){
             }
         }
     }
-
+    if(state == TIE) return true;
     return false;
+}
+
+uint TicTacToe::movesLeft(){
+    uint counter = 0;
+    for(uint i = 0; i < boardSize; i++){
+        for(uint j = 0; j < boardSize; j++){
+            if(board[i][j] == ' ') counter++;
+        }
+    }
+    return counter;
 }
 
 uint TicTacToe::findBestMv(bool isMaxi){
@@ -300,28 +381,80 @@ uint TicTacToe::findBestMv(bool isMaxi){
     int bestVal = -INF;
     if(!isMaxi) bestVal = INF;
     for(uint i = 0; i < boardSize; i++){
-        for(uint j = 0; j < boardSize; j--){
+        for(uint j = 0; j < boardSize; j++){
             if(board[i][j] == ' '){
                 board[i][j] = 'O';
-                int currVal = minimax();
+                int currVal = minimax(*this , movesLeft(), !isMaxi);
                 board[i][j] = ' ';
-                if(currVal > bestVal && isMaxi) bestMv = 4*i + j;
-                if(currVal < bestVal && !isMaxi) bestMv = 4*i + j;
+                if(currVal > bestVal && isMaxi){
+                    bestMv = boardSize*i + j;
+                    bestVal = currVal;
+                }
+                if(currVal < bestVal && !isMaxi){
+                    bestMv = boardSize*i + j;
+                    bestVal = currVal;
+                }
             }
         }
     }
     return bestMv;
 }
 int TicTacToe::evaluateBoard(){
-    if(Win()){
-        switch(state){
-            case WIN_X:
-                return -INF;
-            case WIN_O:
-                return INF;
-        }
+    // call Win() to set correct state
+    this->Win();
+    switch(state){
+        case WIN_X:
+            return -INF;
+        case WIN_O:
+            return INF;
+        case TIE:
+            return 0;
+        case NO_END:
+            return 0;
     }
 }
-int minimax(){
-    
+int minimax(TicTacToe game, uint depth, bool isMaxi){
+    // check if recursion ends or at this board state game is finished
+    if(depth == 0 || game.Win()) return game.evaluateBoard();
+
+    if(isMaxi){
+        int maxEval = -INF;
+        uint mv = 0; // to remeber last made mv and not duplicate
+        bool mvUsed = false; // to indicate if in previous iteration mv was made
+        for(uint i = 0; i < depth; i++){
+            TicTacToe child = game;
+            while(!child.isMvPsbl(mv) || mvUsed){ // check if mv can be made and hasn't been made before
+                mv++; // go to nxt mv
+                mvUsed = false; // set mv as not used
+            }
+            child.turn = false;
+            child.makeMove(mv);
+            mvUsed = true; // set mv as used
+            int eval = minimax(child, depth-1, false);
+            maxEval = max(maxEval, eval);
+        }
+        return maxEval;
+    }
+    else{
+        int minEval = INF;
+        uint mv = 0;
+        bool mvUsed = false;
+        for(uint i = 0; i < depth; i++){
+            TicTacToe child = game;
+            while(!child.isMvPsbl(mv) || mvUsed){
+                mv++;
+                mvUsed = false;
+            }
+            child.turn = true;
+            child.makeMove(mv);
+            mvUsed = true;
+            /*LOG("________child's board_______");
+            child.printBoard();
+            LOG("________parent's board________")
+            game.printBoard();*/
+            int eval = minimax(child, depth-1, true);
+            minEval = min(minEval, eval);
+        }
+        return minEval;
+    }
 }

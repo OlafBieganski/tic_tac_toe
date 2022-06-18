@@ -6,6 +6,8 @@ using namespace std;
 #define LOG(x) cout << x <<endl;
 #define INF 2000000000
 
+uint MAX_DEPTH = 0;
+
 TicTacToe initialize_Game(){
     uint boardSize;
     bool playComp, whoStart;
@@ -259,7 +261,6 @@ bool TicTacToe::Win(){
             }
             if(isWin){
                 state = WIN_X;
-                //cout << "STATE: " <<  state << endl;
                 return true;
             }
             isWin = true;
@@ -288,7 +289,6 @@ bool TicTacToe::Win(){
             }
             if(isWin){
                 state = WIN_X;
-                //cout << "STATE: " <<  state << endl;
                 return true;
             }
             isWin = true;
@@ -317,7 +317,6 @@ bool TicTacToe::Win(){
             }
             if(isWin){
                 state = WIN_X;
-                //cout << "STATE: " <<  state << endl;
                 return true;
             }
             isWin = true;
@@ -346,7 +345,6 @@ bool TicTacToe::Win(){
             }
             if(isWin){
                 state = WIN_X;
-                //cout << "STATE: " <<  state << endl;
                 return true;
             }
             isWin = true;
@@ -380,12 +378,16 @@ uint TicTacToe::findBestMv(bool isMaxi){
     uint bestMv;
     int bestVal = -INF;
     if(!isMaxi) bestVal = INF;
+    if(movesLeft() == boardSize*boardSize) return boardSize*boardSize/2;
     for(uint i = 0; i < boardSize; i++){
         for(uint j = 0; j < boardSize; j++){
             if(board[i][j] == ' '){
                 board[i][j] = 'O';
                 int depth = movesLeft();
-                depth = depth > 8 ? 8 : depth;
+                MAX_DEPTH = boardSize == 4 ? 10 : 0;
+                MAX_DEPTH = numToWin > 3 ? 10 : 0;
+                MAX_DEPTH = boardSize == 5 ? 5 : 0;
+                MAX_DEPTH = boardSize == 6 ? 3 : 0;
                 int currVal = minimax(*this , depth, -INF, INF, !isMaxi);
                 board[i][j] = ' ';
                 if(currVal > bestVal && isMaxi){
@@ -406,9 +408,9 @@ int TicTacToe::evaluateBoard(){
     this->Win();
     switch(state){
         case WIN_X:
-            return -INF;
+            return -100;
         case WIN_O:
-            return INF;
+            return 100;
         case TIE:
             return 0;
         case NO_END:
@@ -417,7 +419,7 @@ int TicTacToe::evaluateBoard(){
 }
 int minimax(TicTacToe game, uint depth, int alpha, int beta, bool isMaxi){
     // check if recursion ends or at this board state game is finished
-    if(depth == 0 || game.Win()){
+    if(depth == MAX_DEPTH || game.Win()){
         int result = game.evaluateBoard(), add = 0;
         if(game.state == WIN_O) add = depth;
         if(game.state == WIN_X) add = -depth;
@@ -457,10 +459,6 @@ int minimax(TicTacToe game, uint depth, int alpha, int beta, bool isMaxi){
             child.turn = true;
             child.makeMove(mv);
             mvUsed = true;
-            /*LOG("________child's board_______");
-            child.printBoard();
-            LOG("________parent's board________")
-            game.printBoard();*/
             int eval = minimax(child, depth-1, alpha, beta, true);
             minEval = min(minEval, eval);
             beta = min(beta, eval);

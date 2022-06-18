@@ -1,6 +1,6 @@
 #ifndef TICTACTOE
 #define TICTACTOE
-#include "iostream"
+#include <iostream>
 
 enum player {PLAYER1, PLAYER2, COMPUTER};
 enum gameStatus {WIN_X, TIE, WIN_O, NO_END};

@@ -62,7 +62,6 @@ void TicTacToe::startGame(){
         break;
 
     case COMPUTER:
-        printBoard();
         while(!Win()){
             askForMove();
             printBoard();
@@ -382,12 +381,15 @@ uint TicTacToe::findBestMv(bool isMaxi){
     for(uint i = 0; i < boardSize; i++){
         for(uint j = 0; j < boardSize; j++){
             if(board[i][j] == ' '){
+                // lines responsible for optimalization
+                MAX_DEPTH = boardSize == 4 ? 14 : MAX_DEPTH;
+                if( movesLeft() > 12){
+                    MAX_DEPTH = numToWin >  3 ? 14 : MAX_DEPTH;
+                    MAX_DEPTH = boardSize == 5 ? 5 : MAX_DEPTH;
+                    MAX_DEPTH = boardSize == 6 ? 3 : MAX_DEPTH;
+                }
                 board[i][j] = 'O';
                 int depth = movesLeft();
-                MAX_DEPTH = boardSize == 4 ? 10 : 0;
-                MAX_DEPTH = numToWin > 3 ? 10 : 0;
-                MAX_DEPTH = boardSize == 5 ? 5 : 0;
-                MAX_DEPTH = boardSize == 6 ? 3 : 0;
                 int currVal = minimax(*this , depth, -INF, INF, !isMaxi);
                 board[i][j] = ' ';
                 if(currVal > bestVal && isMaxi){
